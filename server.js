@@ -2,12 +2,13 @@
 * @Author: Mengwei Choong
 * @Date:   2018-01-27 10:32:55
 * @Last Modified by:   Mengwei Choong
-* @Last Modified time: 2018-01-28 11:49:31
+* @Last Modified time: 2018-01-28 11:50:10
 */
 
 // server.js
 const express = require('express');
-var dist = __dirname + "/public" ;
+var dist = __dirname + "/public";
+console.log('yeah');
 
 const app = express()
 .use(express.static(dist));
