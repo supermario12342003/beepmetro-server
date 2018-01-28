@@ -1,4 +1,4 @@
-webpackJsonp(["admin.module"],{
+webpackJsonp(["admin.module" ],{
 
 /***/ "../../../../../src/app/features/admin/admin-routing.module.ts":
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
@@ -102,7 +102,7 @@ exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-b
 
 
 // module
-exports.push([module.i, "/*\n* @Author: Mengwei Choong\n* @Date:   2018-01-24 12:58:29\n* @Last Modified by:   Mengwei Choong\n* @Last Modified time: 2018-01-24 20:07:41\n*/\n", ""]);
+exports.push([module.i, "/*\n* @Author: Mengwei Choong\n* @Date:   2018-01-24 12:58:29\n* @Last Modified by:   Mengwei Choong
 
 // exports
 
