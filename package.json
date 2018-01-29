@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node server.js",
-    "heroku:pre": "git checkout heroku",
+    "heroku:pre": "git checkout heroku; git pull origin master;",
     "heroku:push": "git add . ; git commit -m 'new' ; git push heroku heroku:master; git checkout master",
     "heroku": "npm run heroku:pre && npm run heroku:push",
     "db": "mongod --dbpath ./db"
