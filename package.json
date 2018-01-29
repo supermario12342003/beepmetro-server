@@ -3,7 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "heroku:pre": "git checkout heroku",
+    "heroku:push": "git add . ; git commit -m 'new' ; git push heroku heroku:master; git checkout master",
+    "heroku": "npm run heroku:pre && npm run heroku:push"
   },
   "dependencies": {
     "express": "^4.16.2",
