@@ -2,7 +2,7 @@
 * @Author: Mengwei Choong
 * @Date:   2018-01-27 10:32:55
 * @Last Modified by:   Mengwei Choong
-* @Last Modified time: 2018-01-29 13:38:27
+* @Last Modified time: 2018-01-29 14:48:12
 */
 
 // server.js
@@ -14,10 +14,15 @@ const server = app.listen(process.env.PORT || 8080, () => {
 });
 
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/' + process.env.DB || "local")
+if (process.env.NODE_ENV == "development") 
+	var mongodbUrl = "mongodb://localhost/beepmetro"
+else
+	var mongodbUrl = "mongodb://mchoong:Mario171731(@ds119736.mlab.com:19736/beepmetro"
+mongoose.connect(mongodbUrl)
 	.then(
 	() => console.log("db connected"),
-	err => console.log("db failed to connected")
+	err => console.log("db failed to connected", err)
+
 );
 
 app.use(express.static(dist));
