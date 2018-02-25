@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node server.js",
+    "test": "mocha",
     "heroku:pre": "git checkout heroku; git pull origin master;",
     "heroku:push": "git add . ; git commit -m 'new' ; git push heroku heroku:master; git checkout master",
     "heroku": "npm run heroku:pre && npm run heroku:push",
@@ -20,6 +21,6 @@
     "axios": "^0.17.1",
     "chai": "^4.1.2",
     "mocha": "^5.0.0",
-    "nodemon": "^1.14.11",
+    "nodemon": "^1.14.11"
   }
 }

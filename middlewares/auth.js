@@ -1,22 +1,21 @@
 
+var jwt = require('jsonwebtoken');
+
 var getUser = function (req, res, next) {
 	var token = req.body.token || req.query.token || req.headers['x-access-token'];
+	req.userId = null
+	req.isAdmin = false
 	if (token) {
-		User.verifyToken(token)
-		.then((data) => {      
-      // if everything is good, save to request for use in other routes
-      req.userId = data._id; 
-      req.isAdmin = data.isAdmin   
-      next();
-
-    })
-		.catch(next)
+		try {
+			var data = jwt.verify(token, process.env.secret || "secrets")
+			// if everything is good, save to request for use in other routes
+			req.userId = data._id; 
+			req.isAdmin = data.isAdmin   
+		}
+		catch (err) {}
 	}
-	else {
-		req.userId = null
-		req.isAdmin = false
-		next()
-	}
+	// invalid token
+	next()
 }
 
 
@@ -42,5 +41,6 @@ var isAdmin = function (req, res, next) {
 		next('route');
 	}
 }
+
 
 module.exports = {isAdmin, isAuthenticated, getUser}
