@@ -2,7 +2,7 @@
 * @Author: Mengwei Choong
 * @Date:   2018-01-29 20:03:37
 * @Last Modified by:   Mengwei Choong
-* @Last Modified time: 2018-02-04 03:19:38
+* @Last Modified time: 2018-02-25 14:08:50
 */
 var mongoose = require('mongoose');
 
@@ -19,23 +19,15 @@ var baseSchema = new mongoose.Schema({
 	},
 	
 });
-var userRights= {
-	write: [],
-	read: ["createdDate", "modifiedDate"],
-	add: function(rights) {
-		rights.write.forEach((w) => this.write.push(w))
-		rights.read.forEach((r) => this.read.push(r))
-	}
-}
 
 //try save, if fails, then simply errors and return, {success, obj/errors}
-baseSchema.methods.validateAndSave = function(isAdmin=false) {
+baseSchema.methods._validateAndSave = function(fieldSetArray) {
 	var model = this;
 	return new Promise((resolve, reject) => {
 		model.save()
 		.then((obj) => {
 			if (obj) {
-				resolve({success:true, obj:obj.getData(isAdmin)})
+				resolve({success:true, obj:obj.getData(fieldSetArray)})
 			}
 			// resolve with validation errors
 			else
@@ -57,57 +49,59 @@ baseSchema.methods.validateAndSave = function(isAdmin=false) {
 	})
 }
 
-baseSchema.methods.setField = function(field, data, accessRight) {
-	var writableFields = this.getWritableFields(accessRight)
-	if (field in writableFields) {
-		this[field] = data
-		return true
+baseSchema.methods._getFieldSetArray= function(fieldSet="adminFields") {
+	var model = this
+	var fieldSetArray = model.schema[fieldSet]
+
+	if (typeof(fieldSetArray) === "undefined") {
+		var fields = []
+		for (key in model.schema.tree) {
+			fields.push(key)
+		}
+		var fieldSetArray = {
+			"read": fields,
+			"write": fields
+		}
 	}
-	return false
+	else {
+		if (typeof(fieldSetArray["read"]) === "undefined") {
+			fieldSetArray.read = []
+		}
+		if (typeof(fieldSetArray["write"]) === "undefined") {
+			fieldSetArray.write = fieldSetArray["read"]
+		}
+	}
+
+	return fieldSetArray
 }
 
 //setData update the data then validate then save, if param save is false, it return nothing
-baseSchema.methods.setFields = function(data, accessRight, save=true) {
-	this._original = {}
-	for (key in this.schema.tree)
-		this._original[key] = model[key]
-	for (key in data) {
-		this.setField(key, data[key], accessRight)
-	}
-	if (save)
-		return model.validateAndSave(isAdmin)
-}
-
-//setData update the data then validate then save, if param save is false, it return nothing
-baseSchema.methods.setData = function(data, isAdmin=false, save=true) {
+baseSchema.methods.setData = function(data, fieldSet="adminFields", save=true) {
 	var model = this
 	model._original = {}
-	for (key in this.schema.tree)
-		model._original[key] = model[key]
-	for (key in data) {
-		var field = this.schema.tree[key]
-		if (field) {
-			if (!field.requireAdmin || isAdmin) {
-				model[key] = data[key]
-			}
+	var fieldSetArray = model._getFieldSetArray(fieldSet)
+	for (index in fieldSetArray.write) {
+		var field = fieldSetArray.write[index]
+		model._original[field] = model[field]
+
+		if (typeof(data[field]) != "undefined") {
+			model[field] = data[field]
 		}
-		//maybe virtual
-		else
-			model[key] = data[key]
 	}
 	if (save)
-		return model.validateAndSave(isAdmin)
+		return model._validateAndSave(fieldSetArray)
 }
 
-baseSchema.methods.getData = function(isAdmin=false) {
+baseSchema.methods.getData = function(fieldSetArray) {
 	var ret = {}
 	var data = this.toJSON()
-	for (key in data) {
-		var field = this.schema.tree[key]
-		if (!field.requireAdmin || isAdmin) {
-			ret[key] = data[key]
+	for (index in fieldSetArray.read) {
+		var field = fieldSetArray.read[index]
+		if (typeof(data[field]) != "undefined") {
+			ret[field] = data[field]
 		}
 	}
+	ret["_id"] = this._id
 	return ret
 }
 

@@ -17,16 +17,6 @@ module.exports = function (server, db) {
 			.then(done)
 		})
 
-		describe('database', () => {
-			it('should be empty', (done) => {
-				axios.get(HOST + '/api/user')
-				.then(res => {
-					(res.data).should.deep.equal([])
-					done()
-				})
-				.catch(done)
-			})
-		}) 
 		describe('create user without anything', () => {
 			it('should give success false', (done) => {
 				axios.post(HOST + '/api/user', {})
@@ -47,7 +37,7 @@ module.exports = function (server, db) {
 					username: "test",
 				})
 				.then(res => {
-					should.exist(res.data.obj);
+					should.exist(res.data.obj.email);
 					user = res.data.obj;
 					done()
 				})
@@ -259,8 +249,7 @@ module.exports = function (server, db) {
 					lastName: "choong",
 					email: "whatever@gmail.com",
 					password: "asdasd11233",
-				})
-				normalUser.validateAndSave()
+				}, "adminFields")
 				.then(res => {
 					normalUser = res.obj;
 					normalUser.firstName.should.equal("normal user")
@@ -282,7 +271,9 @@ module.exports = function (server, db) {
 		})
 		describe('user can be removed?', () => {
 			it('yes', (done) => {
-				axios.delete(HOST + '/api/user/' + user._id)
+				axios.delete(HOST + '/api/user/' + user._id, {
+					headers: {'x-access-token': token},
+				})
 				.then(res => {
 					(res.data.success).should.equal(true)
 					done()
@@ -292,7 +283,9 @@ module.exports = function (server, db) {
 		})
 		describe('user can be removed again?', () => {
 			it('yes but success = false', (done) => {
-				axios.delete(HOST + '/api/user/' + user._id)
+				axios.delete(HOST + '/api/user/' + user._id, {
+					headers: {'x-access-token': token},
+				})
 				.then(res => {
 					(res.data.success).should.equal(false)
 					done()

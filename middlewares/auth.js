@@ -11,6 +11,7 @@ var getUser = function (req, res, next) {
 			// if everything is good, save to request for use in other routes
 			req.userId = data._id; 
 			req.isAdmin = data.isAdmin   
+			req.hasRight = false
 		}
 		catch (err) {}
 	}
@@ -20,22 +21,46 @@ var getUser = function (req, res, next) {
 
 
 var isAuthenticated = function (req, res, next) {
-	if (req.userId)
+	if (req.hasRight || req.isAdmin) {
 		next()
+	}
+	else if (req.userId) {
+		req.hasRight = true
+		next()
+	}
 	else {
 		res.status(403).send({
+			success: false,
 			message: 'Token is expired or invalid.'
 		});    
 		next('route');
 	}
 }
 
+var isOwnerUser = function(req, res, next) {
+	if (req.hasRight || req.isAdmin) {
+		next()
+	}
+	else if (req.params.userId && req.params.userId === req.userId) {
+		req.hasRight = true
+		next()
+	}
+	else {
+		res.status(403).send({
+			success: false,
+			message: 'You need to be the owner of this user.'
+		});    
+		next('route');
+	}
+}
+
 var isAdmin = function (req, res, next) {
-	if (req.isAdmin) {
-		next();
+	if (req.hasRight || req.isAdmin) {
+		next()
 	}
 	else {
 		res.status(403).send({ 
+			success: false,
 			message: 'Not admin' 
 		});
 		next('route');
@@ -43,4 +68,4 @@ var isAdmin = function (req, res, next) {
 }
 
 
-module.exports = {isAdmin, isAuthenticated, getUser}
+module.exports = {isAdmin, isAuthenticated, isOwnerUser, getUser}

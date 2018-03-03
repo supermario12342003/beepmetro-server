@@ -2,7 +2,7 @@
 * @Author: Mengwei Choong
 * @Date:   2018-01-29 11:27:31
 * @Last Modified by:   Mengwei Choong
-* @Last Modified time: 2018-02-25 12:28:43
+* @Last Modified time: 2018-02-25 13:47:32
 */
 
 // The User model
@@ -47,15 +47,11 @@ var userSchema = new Schema({
 		requireAdmin: true,
 	}
 });
-/*
-userSchema.userRights.add({
-	write: ["email", "password", "firstName", "lastName"],
-	read: ["email", "password", "firstName", "lastName", "emailVerified", "isAdmin"],
-})
-*/
 
-userSchema.adminFields = null
-userSchema.userFields = ["email", "password", "firstName", "lastName"]
+userSchema.userFields = {
+	"read" : ["email", "password", "firstName", "lastName", "emailVerified"],
+	"write" : ["email", "password", "firstName", "lastName"],
+}
 
 userSchema.pre('validate', function(next) {
 	if (!/\d/.test(this.password))
