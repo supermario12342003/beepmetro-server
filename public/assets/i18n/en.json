@@ -1,0 +1,11 @@
+{
+  "HELLO": "hello {{value}}",
+  "USER": {
+    "REGISTER": {
+      "REGISTER": "Register"
+    },
+    "LOGIN": {
+      "LOGIN": "Login"
+    }
+  }
+}

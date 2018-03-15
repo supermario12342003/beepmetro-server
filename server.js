@@ -2,7 +2,7 @@
 * @Author: Mengwei Choong
 * @Date:   2018-01-31 17:09:07
 * @Last Modified by:   Mengwei Choong
-* @Last Modified time: 2018-03-14 16:11:36
+* @Last Modified time: 2018-03-15 17:00:49
 */
 
 var app = require('./app')
@@ -14,6 +14,6 @@ else
 	var mongodbUrl = "mongodb://mchoong:Mario171731(@ds119736.mlab.com:19736/beepmetro"
 mongoose.connect(mongodbUrl)
 
-const server = app.listen(process.env.PORT || 8080, () => {
+const server = app.listen(process.env.PORT || 80, () => {
   console.log("server listening... " + server.address().port);
 });
