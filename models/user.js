@@ -2,7 +2,7 @@
 * @Author: Mengwei Choong
 * @Date:   2018-01-29 11:27:31
 * @Last Modified by:   Mengwei Choong
-* @Last Modified time: 2018-02-25 13:47:32
+* @Last Modified time: 2018-03-15 14:01:56
 */
 
 // The User model
@@ -12,27 +12,28 @@ var bcrypt = require('bcrypt');
 var Base = require('./base');
 var jwt = require('jsonwebtoken');
 var User;
+var i18n = require('i18n');
 
 var userSchema = new Schema({
 	email: {
 		type: String,
-		unique: [true, "Email already exists."],
-		required: [true, "Email is required."],
+		unique: [true, i18n.__("Email already exists.")],
+		required: [true, i18n.__("Email is required.")],
 		trim: true,
 	},
 	password: {
 		type: String,
-		required: [true, "Password is required."],
-		minlength: [6, "Password must be at least 6 characters."],
+		required: [true, i18n.__("Password is required.")],
+		minlength: [6, i18n.__("Password must be at least 6 characters.")],
 	},
 	firstName: {
 		type: String,
-		required: [true, "First name is required."],
+		required: [true, i18n.__("First name is required.")],
 		trim:true,
 	},
 	lastName: {
 		type: String,
-		required: [true, "Last name is required."],
+		required: [true, i18n.__("Last name is required.")],
 		trim:true,
 	},
 	emailVerified: {
@@ -53,11 +54,16 @@ userSchema.userFields = {
 	"write" : ["email", "password", "firstName", "lastName"],
 }
 
+userSchema.anonFields = {
+	"read" : ["firstName", "lastName"],
+	"write" : [],
+}
+
 userSchema.pre('validate', function(next) {
 	if (!/\d/.test(this.password))
-		this.invalidate('password', 'Password must contain at least one number')
+		this.invalidate('password', i18n.__("Password must contain at least one number"))
 	if (!/[A-Za-z]+/.test(this.password))
-		this.invalidate('password', 'Password must contain at least one alphabet')
+		this.invalidate('password', i18n.__("Password must contain at least one alphabet"))
 	next();
 })
 
@@ -111,6 +117,6 @@ userSchema.statics.authenticate = function (email, password) {
 }
 
 
-userSchema.plugin(require('mongoose-unique-validator'), { message: 'Error, expected {PATH} to be unique.' });
+userSchema.plugin(require('mongoose-unique-validator'), { message: i18n.__("Error, expected {PATH} to be unique.") });
 module.exports = User = Base.discriminator('User', userSchema)
 

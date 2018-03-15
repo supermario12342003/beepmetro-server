@@ -12,7 +12,7 @@ describe('Main test', () => {
 		db.close()
 		server.close(done)
 	});
-	require('./test.spec')();
+	require('./test.spec')(server, db);
 	require('../routes/user.spec')(server, db);
 
 })

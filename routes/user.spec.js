@@ -219,7 +219,7 @@ module.exports = function (server, db) {
 			it('should return success and obj updated, emailVerified shown', (done) => {
 				User.findOne({_id: user._id})
 				.then((user) => {
-					user.setData({isAdmin: true}, true)
+					user.setData({isAdmin: true})
 					.then(ret => {
 						token = user.getToken()
 						axios.put(HOST + '/api/user/' + user._id, {
@@ -294,4 +294,90 @@ module.exports = function (server, db) {
 			})
 		})
 	})
+
+describe('pagination', () => {
+	before((done) => {
+		db.dropDatabase()
+		.then(() => {
+					//init db here
+				})
+		.then(done)
+	})
+
+	describe('simple list with 9 limit', () => {
+		it('should give 9 items', (done) => {
+			var i = 0;
+			var createUser = () => {
+				i++;
+				return axios.post(HOST + '/api/user', {
+					email: "test" + i + "@gmail.com",
+					password: "ad123456",
+					firstName: "firstName" + i,
+					lastName: "lastName" + i,
+					username: "test" + i,
+				})
+			}
+			var createUserCalls = []
+			for (var c = 0; c < 10; c++) {
+				createUserCalls.push(createUser())
+			}
+			axios.all(createUserCalls)
+			.then(() => {
+				axios.post(HOST + '/api/user/authenticate', {
+					email: "test1@gmail.com",
+					password: "ad123456",
+				})
+				.then(res => {
+					token = res.data.token
+					axios.get(HOST + '/api/user', {
+						params: {
+							paginationLimit: 9,
+						},
+						headers: {'x-access-token': token},
+					})
+					.then(res => {
+						(res.data.length).should.equal(9)
+						done()
+					})
+					.catch(done)
+				})
+				.catch(done)
+			})
+			.catch(done)
+		})
+	})
+
+	describe('list start with 3', () => {
+		it('should return 7 entries', (done) => {
+			axios.get(HOST + '/api/user', {
+				params: {
+					paginationStart: 3,
+				},
+				headers: {'x-access-token': token},
+			})
+			.then(res => {
+				(res.data.length).should.equal(7);
+				done();
+			})
+			.catch(done)
+		})
+	})
+
+	describe('list sort with -lastName', () => {
+		it('should return entries start with lastName9, lastName10 is second last entry', (done) => {
+			axios.get(HOST + '/api/user', {
+				params: {
+					paginationSort: "-lastName",
+				},
+				headers: {'x-access-token': token},
+			})
+			.then(res => {
+				(res.data[0].lastName).should.equal("lastName9");
+				(res.data[8].lastName).should.equal("lastName10");
+				done()
+			})
+			.catch(done)
+		})
+	})
+})
 }

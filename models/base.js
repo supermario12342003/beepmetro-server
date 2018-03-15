@@ -2,9 +2,10 @@
 * @Author: Mengwei Choong
 * @Date:   2018-01-29 20:03:37
 * @Last Modified by:   Mengwei Choong
-* @Last Modified time: 2018-02-25 14:08:50
+* @Last Modified time: 2018-03-15 14:03:37
 */
 var mongoose = require('mongoose');
+var i18n = require('i18n');
 
 var baseSchema = new mongoose.Schema({
 	createdDate: {
@@ -27,7 +28,10 @@ baseSchema.methods._validateAndSave = function(fieldSetArray) {
 		model.save()
 		.then((obj) => {
 			if (obj) {
-				resolve({success:true, obj:obj.getData(fieldSetArray)})
+				resolve({
+					success:true,
+					obj:obj.toJSON({fieldSetArray:fieldSetArray})
+				})
 			}
 			// resolve with validation errors
 			else
@@ -35,8 +39,9 @@ baseSchema.methods._validateAndSave = function(fieldSetArray) {
 		})
 		.catch((err) => {
 			//if it's not form errors
-			if (!err.errors)
+			if (!err.errors) {
 				reject(err);
+			}
 			// resolve with unique and maybe other errors
 			else {
 				var errors = {}
@@ -52,15 +57,18 @@ baseSchema.methods._validateAndSave = function(fieldSetArray) {
 baseSchema.methods._getFieldSetArray= function(fieldSet="adminFields") {
 	var model = this
 	var fieldSetArray = model.schema[fieldSet]
-
 	if (typeof(fieldSetArray) === "undefined") {
-		var fields = []
-		for (key in model.schema.tree) {
-			fields.push(key)
+		if (fieldSet == "adminFields") {
+			fieldSetArray = {
+				"read": Object.keys(model.schema.tree),
+				"write": Object.keys(model.schema.tree),
+			}
 		}
-		var fieldSetArray = {
-			"read": fields,
-			"write": fields
+		else {
+			fieldSetArray = {
+				"read": [],
+				"write": []
+			}
 		}
 	}
 	else {
@@ -92,26 +100,48 @@ baseSchema.methods.setData = function(data, fieldSet="adminFields", save=true) {
 		return model._validateAndSave(fieldSetArray)
 }
 
-baseSchema.methods.getData = function(fieldSetArray) {
-	var ret = {}
-	var data = this.toJSON()
-	for (index in fieldSetArray.read) {
-		var field = fieldSetArray.read[index]
-		if (typeof(data[field]) != "undefined") {
-			ret[field] = data[field]
-		}
-	}
-	ret["_id"] = this._id
-	return ret
-}
-
 baseSchema.pre('save', function (next) {
 	if (!this._original) {
 		//TODO throw error so that dev should always use setData
-		throw "You should use setData to update an object"
+		throw i18n.__("You should use setData to update an object")
 	}
 	this.modifiedDate = Date.now()
 	next()
 })
 
-module.exports = mongoose.model('Base', baseSchema);;
+if (!baseSchema.options.toObject) baseSchema.options.toObject = {};
+if (!baseSchema.options.toJSON) baseSchema.options.toJSON = {};
+baseSchema.options.toObject.transform = function (doc, ret, options) {
+	var new_ret = {}
+	if (typeof(options.fieldSetArray) === "undefined")
+		options.fieldSetArray = doc._getFieldSetArray(options.fieldSet)
+	options.fieldSetArray.read.forEach(function (prop) {
+		new_ret[prop] = ret[prop]
+	});
+	new_ret["_id"] = ret._id
+	return new_ret;
+}
+
+baseSchema.options.toJSON.transform = baseSchema.options.toObject.transform;
+
+baseSchema.statics.getPaginatedList = function(model, data, options={}) {
+	var start = parseInt(data['paginationStart'])
+	var limit = parseInt(data['paginationLimit'])
+	var sort = data["paginationSort"]
+	
+	if (isNaN(start))
+		start = 0
+	if (isNaN(limit))
+		limit = 100
+	if (!("paginationSort" in data))
+		sort = "createdDate"
+	
+	return model.find(options)
+	.skip(start)
+	.limit(limit)
+	.sort(sort)
+}
+
+var Base = mongoose.model('Base', baseSchema);
+
+module.exports = Base
