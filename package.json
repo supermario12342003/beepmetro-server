@@ -9,7 +9,7 @@
     "heroku:push": "git add . ; git commit -m 'new' ; git push heroku heroku:master; git checkout master",
     "heroku": "npm run heroku:pre && npm run heroku:push",
     "trans": "node translate.js all",
-    "db": "mongod --dbpath ~/mongodb/beepmetro --quiet --logpath ~/mongodb/beepmetro/log &"
+    "db": "forever start mongod --dbpath ~/mongodb/beepmetro --quiet --logpath ~/mongodb/beepmetro/log &"
   },
   "dependencies": {
     "bcrypt": "^1.0.3",
