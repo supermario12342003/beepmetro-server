@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node server.js &",
+    "start": "node server.js >> log 2>&1 &",
     "test": "mocha",
     "heroku:pre": "git checkout heroku; git pull origin master;",
     "heroku:push": "git add . ; git commit -m 'new' ; git push heroku heroku:master; git checkout master",
