@@ -33,6 +33,7 @@ testem.log
 /typings
 /.env
 /db
+/package-lock.json
 
 # System Files
 .DS_Store
