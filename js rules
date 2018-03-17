@@ -1,8 +1,0 @@
-js rules
-1) promise always catch
-2) no ;
-
-todo:
-test userFields Read and Write
-fix for array and typeof confusion
-
