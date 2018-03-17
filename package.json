@@ -3,13 +3,13 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "forever start server.js >> log 2>&1 &",
+    "start": "forever -o ~/.logs/beepmetro/server-log -e ~/.logs/beepmetro/server-err-log start server.js",
     "test": "mocha",
     "heroku:pre": "git checkout heroku; git pull origin master;",
     "heroku:push": "git add . ; git commit -m 'new' ; git push heroku heroku:master; git checkout master",
     "heroku": "npm run heroku:pre && npm run heroku:push",
     "trans": "node translate.js all",
-    "db": "mongod --dbpath ~/mongodb/beepmetro --quiet --logpath ~/mongodb/beepmetro/log &"
+    "db": "mongod --dbpath ~/mongodb/beepmetro --quiet --logpath ~/.logs/beepmetro/db-log &"
   },
   "dependencies": {
     "bcrypt": "^1.0.3",
